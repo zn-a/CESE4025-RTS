@@ -1,0 +1,15 @@
+workflow:
+  rules:
+  - if: $CI_PIPELINE_SOURCE == 'merge_request_event' && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+image: gcc
+
+before_script:
+   - apt-get update -yqq
+   - apt-get install -yqq --no-install-recommends build-essential
+
+code-validation:
+  script:
+    - cd assignment-a
+    - ./code-format-validator
