@@ -56,7 +56,7 @@ int main() {
 #ifdef TASK_SET_1
     //Task Set 1
     spawn_task(2, 20, leds[0]);
-    spawn_task(10, 400, leds[1]);
+    spawn_task(10, 40, leds[1]);
     spawn_task(30, 60, leds[2]);
 #elif defined TASK_SET_2
     //Task Set 2
