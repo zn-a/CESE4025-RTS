@@ -27,8 +27,8 @@
 //
 // Only uncomment one #define to select the Task Set
 //
-#define TASK_SET_1
-//#define TASK_SET_2
+// #define TASK_SET_1
+#define TASK_SET_2
 //#define TASK_SET_3
 //#define APERIODIC_TASKS
 
@@ -60,6 +60,8 @@ int main() {
     spawn_task(30, 60, leds[2]);
 #elif defined TASK_SET_2
     //Task Set 2
+    // U = 1
+    spawn_task(2, 2, leds[0]);
 #elif defined TASK_SET_3
     //Task Set 3
 #elif defined APERIODIC_TASKS
