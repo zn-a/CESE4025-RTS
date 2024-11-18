@@ -29,7 +29,7 @@
 //
 // #define TASK_SET_1
 #define TASK_SET_2
-//#define TASK_SET_3
+// #define TASK_SET_3
 //#define APERIODIC_TASKS
 
 int main() {
@@ -61,9 +61,12 @@ int main() {
 #elif defined TASK_SET_2
     //Task Set 2
     // U = 1
-    spawn_task(2, 2, leds[0]);
+    spawn_task(20, 40, leds[0]);
+    spawn_task(24, 60, leds[1]);
+    spawn_task(12, 120, leds[2]);
 #elif defined TASK_SET_3
     //Task Set 3
+    // U > 1
 #elif defined APERIODIC_TASKS
     // Use define_aperiodic_task() to define aperiodic tasks
 #endif
