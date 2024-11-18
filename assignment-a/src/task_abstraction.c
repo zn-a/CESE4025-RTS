@@ -80,7 +80,7 @@ void define_aperiodic_task(int switch_number, enum SwitchState switch_state, uns
     if(switch_number > 2 || switch_number < 0){
         printk("Illegal Switch Number!");
         return;
-    }
+    }//pst
     for(int i = 0; i< MAX_APERIODIC_THREADS; i++){
         if(aperiodicTask[i].pin == NULL){
             aperiodicTask[i].switch_number = switch_number;
