@@ -28,8 +28,8 @@
 // Only uncomment one #define to select the Task Set
 //
 // #define TASK_SET_1
-#define TASK_SET_2
-// #define TASK_SET_3
+// #define TASK_SET_2
+#define TASK_SET_3
 //#define APERIODIC_TASKS
 
 int main() {
@@ -67,6 +67,9 @@ int main() {
 #elif defined TASK_SET_3
     //Task Set 3
     // U > 1
+    spawn_task(10, 5, leds[0]);
+    spawn_task(20, 10, leds[1]);
+    spawn_task(50, 60,  leds[2]);
 #elif defined APERIODIC_TASKS
     // Use define_aperiodic_task() to define aperiodic tasks
 #endif
