@@ -57,7 +57,7 @@ bool spawn_task(int execution_time, int period, const struct gpio_dt_spec *pin) 
     task.value = 0;
 
     if (thread_counter == MAX_PERIODIC_THREADS) {
-        printk("Spawned too many threads!");
+        printk("Spawned too many threads!\n");
         return false;
     }
     k_thread_stack_t *stack = periodic_stacks[thread_counter];
@@ -72,13 +72,13 @@ bool spawn_task(int execution_time, int period, const struct gpio_dt_spec *pin) 
     thread_counter++;
 
     k_thread_suspend(tid);
-    printk("Spawned Task-> Execution Time: %d Period: %d ", execution_time, period);
+    printk("Spawned Task-> Execution Time: %d Period: %d\n", execution_time, period);
     return true;
 }
 
 void define_aperiodic_task(int switch_number, enum SwitchState switch_state, unsigned int execution_time, const struct gpio_dt_spec *pin){
     if(switch_number > 2 || switch_number < 0){
-        printk("Illegal Switch Number!");
+        printk("Illegal Switch Number!\n");
         return;
     }
     for(int i = 0; i< MAX_APERIODIC_THREADS; i++){
@@ -111,7 +111,7 @@ void spawn_aperiodictask(unsigned int execution_time, const struct gpio_dt_spec 
         return;
     }
 
-    k_thread_stack_t *stack = aperiodic_stacks[inactive_task+7];
+    k_thread_stack_t *stack = aperiodic_stacks[inactive_task];
     struct k_thread *thread = &aptsk_thread[inactive_task];
 
 
@@ -145,7 +145,7 @@ void button_pressed(const struct device *dev, struct gpio_callback *cb, uint32_t
     for(int i = 0; i < MAX_APERIODIC_THREADS; i++){
         if(switches[aperiodicTask[i].switch_number] == aperiodicTask[i].switch_state){
             spawn_aperiodictask(aperiodicTask[i].execution_time, aperiodicTask[i].pin);
-            printk("Spawned Aperiodic Task %d", i);
+            printk("Spawned Aperiodic Task %d\n", i);
         }
     }
 }
@@ -161,6 +161,7 @@ void run_scheduler(SchedulerType type) {
 
     bool finished = false;
     while (true) {
+        reset_as();
         k_timeout_t sleep = schedule(type, &task_set, &aperiodictask_set, num_tasks, finished);
         finished = k_sleep(sleep) != 0;
     }
