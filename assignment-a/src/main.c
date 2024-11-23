@@ -67,9 +67,9 @@ int main() {
 #elif defined TASK_SET_3
     //Task Set 3
     // U > 1
-    spawn_task(60, 50, leds[0]);
-    spawn_task(20, 10, leds[1]);
-    spawn_task(50, 60,  leds[2]);
+    spawn_task(10, 20, leds[0]);
+    spawn_task(15, 30, leds[1]);
+    spawn_task(20, 40,  leds[2]);
 #elif defined APERIODIC_TASKS
     // Use define_aperiodic_task() to define aperiodic tasks
 #endif
