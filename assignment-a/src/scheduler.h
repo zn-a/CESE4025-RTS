@@ -16,6 +16,13 @@ typedef struct {
     // Flag to check if task is active
     bool active;
     /// Feel free to add your own fields that are used for scheduling below.
+
+    // following two added for rm
+    int next_release_time;
+    int remaining_time;
+
+    // following added for edf
+    int deadline;
 } Task;
 
 
