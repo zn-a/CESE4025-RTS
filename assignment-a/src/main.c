@@ -13,7 +13,6 @@
 
 #include "task_abstraction.h"
 #include "gpio.h"
-
 // Uncomment this macro if you want to print to the console.
 //
 // WARNING: this will mess up the timings, don't use when you are measuring with
@@ -27,9 +26,9 @@
 //
 // Only uncomment one #define to select the Task Set
 //
-// #define TASK_SET_1
+#define TASK_SET_1
 // #define TASK_SET_2
-#define TASK_SET_3
+// #define TASK_SET_3
 //#define APERIODIC_TASKS
 
 int main() {
@@ -70,11 +69,12 @@ int main() {
     spawn_task(10, 20, leds[0]);
     spawn_task(15, 30, leds[1]);
     spawn_task(20, 40,  leds[2]);
+
 #elif defined APERIODIC_TASKS
     // Use define_aperiodic_task() to define aperiodic tasks
 #endif
 
-    run_scheduler(EG);
+    run_scheduler(EDF);
     k_thread_suspend(k_current_get());
 
     return 0;

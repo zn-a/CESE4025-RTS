@@ -55,6 +55,7 @@ bool spawn_task(int execution_time, int period, const struct gpio_dt_spec *pin) 
     task.execution_time = execution_time;
     task.period = period;
     task.value = 0;
+    task.next_release_time = 0;
 
     if (thread_counter == MAX_PERIODIC_THREADS) {
         printk("Spawned too many threads!\n");
