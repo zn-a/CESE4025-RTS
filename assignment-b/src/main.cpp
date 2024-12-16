@@ -15,6 +15,8 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
+// TEST
+
 Synthesizer synth;
 
 /// Function that checks key presses
