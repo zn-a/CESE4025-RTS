@@ -83,22 +83,22 @@ int main(void) {
       }
       state = !state;
 
-      // Check the peripherals input
+      // Check the peripherals input (Green LED, LD4, Task 1, LogicAnalyzer CH0)
       set_led(&debug_led0);
       peripherals_update();
       reset_led(&debug_led0);
 
-      // Get user input from the keyboard
+      // Get user input from the keyboard (Orange LED, LD3, Task 2, LogicAnalyzer CH1)
       set_led(&debug_led1);
       check_keyboard();
       reset_led(&debug_led1);
 
-      // Make synth sound
+      // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2)
       set_led(&debug_led2);
       synth.makesynth((uint8_t *)mem_block);
       reset_led(&debug_led2);
 
-      // Write audio block
+      // Write audio block (Blue LED, LD6, Task 4, LogicAnalyzer CH3)
       set_led(&debug_led3);
       writeBlock(mem_block);
       reset_led(&debug_led3);
