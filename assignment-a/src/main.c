@@ -21,7 +21,7 @@
 //
 // The initialization function will block until the computer opens the USB
 // connection.
-// #define CONSOLE_ENABLED
+#define CONSOLE_ENABLED
 
 // Scheduler Configuration
 //
