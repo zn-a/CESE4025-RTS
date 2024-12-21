@@ -18,6 +18,7 @@
 // TEST
 
 Synthesizer synth;
+// initializes a memory slab that has 6 blocks that are 400 bytes long, each of which is aligned to a 4-byte boundary
 
 /// Function that checks key presses
 void check_keyboard() {
@@ -85,21 +86,51 @@ K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 
 // Ensure buffer/block size and timer period align
 // Buffer for writing to audio driver
-void *mem_block = allocBlock();
-void make_write_synth_thread(void *, void *, void *) {
+// void *mem_block = allocBlock();
+// K_MEM_SLAB_DEFINE(audio_buffer, 400, 2, 4);
+void *mem_block_synth = allocBlock();
+void *mem_block_write = allocBlock();
+[[noreturn]] void make_write_synth_thread(void *, void *, void *) {
+  // char *block_ptr_synth;
+  // char *block_ptr_write;
+  // printuln("Block size: %p\n", sizeof(int16_t) * (44100*0.05));
+  // if (k_mem_slab_alloc(&audio_buffer, (void **)&block_ptr_synth, K_MSEC(100)) == 0) {
+  //   memset(block_ptr_synth, 0, 400);
+  // } else {
+  //   printuln("Memory allocation failed/timed out.");
+  // }
+
+  // if (k_mem_slab_alloc(&audio_buffer, (void **)&block_ptr_write, K_MSEC(100)) == 0) {
+  //   memset(block_ptr_write, 0, 400);
+  // } else {
+  //   printuln("Memory allocation failed/timed out.");
+  // }
   printuln("make_write_synth_thread");
+  // printuln("Synth block: %p\n", block_ptr_synth);
+  // printuln("Write block: %p\n", block_ptr_write);
+  void *block_ptr_active = mem_block_synth;
+  void *block_ptr_inactive = mem_block_write;
+
   while (true) {
     k_sem_take(&make_write_synth, K_FOREVER);
     // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2)
     set_led(&debug_led2);
-    synth.makesynth((uint8_t *)mem_block);
+    // synth.makesynth((uint8_t *)mem_block);
+    synth.makesynth((uint8_t *)block_ptr_active);
     reset_led(&debug_led2);
 
     // Write audio block (Blue LED, LD6, Task 4, LogicAnalyzer CH3)
     set_led(&debug_led3);
-    writeBlock(mem_block);
+    // writeBlock(mem_block);
+    writeBlock(block_ptr_active);
     reset_led(&debug_led3);
+
+    void *temp = block_ptr_active;
+    block_ptr_active = block_ptr_inactive;
+    block_ptr_inactive = temp;
   }
+  // k_mem_slab_free(&audio_buffer, (void *)block_ptr_synth);
+  // k_mem_slab_free(&audio_buffer, (void *)block_ptr_write);
 
 }
 

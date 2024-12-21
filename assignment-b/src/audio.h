@@ -27,7 +27,8 @@
 #define BLOCK_SIZE (BYTES_PER_SAMPLE * SAMPLES_PER_BLOCK) 
 
 // the number of audio blocks to use
-#define BLOCK_COUNT (1)
+// Changed this to two because we want to implement double buffering
+#define BLOCK_COUNT (2)
 
 
 
