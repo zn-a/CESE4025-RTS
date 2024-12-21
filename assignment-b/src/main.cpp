@@ -73,12 +73,23 @@ void check_keyboard_thread(void *, void *, void *) {
   }
 
 }
+
+
+K_SEM_DEFINE(make_write_synth, 0, 1);
+
+static void audio_timer_callback(struct k_timer *timer_id)
+{
+  k_sem_give(&make_write_synth);
+}
+K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
+
+// Ensure buffer/block size and timer period align
 // Buffer for writing to audio driver
 void *mem_block = allocBlock();
 void make_write_synth_thread(void *, void *, void *) {
   printuln("make_write_synth_thread");
   while (true) {
-
+    k_sem_take(&make_write_synth, K_FOREVER);
     // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2)
     set_led(&debug_led2);
     synth.makesynth((uint8_t *)mem_block);
@@ -88,7 +99,6 @@ void make_write_synth_thread(void *, void *, void *) {
     set_led(&debug_led3);
     writeBlock(mem_block);
     reset_led(&debug_led3);
-    k_msleep(5);
   }
 
 }
@@ -124,6 +134,7 @@ int main(void) {
   printuln("== Finished initialization ==");
 
   int64_t time = k_uptime_get();
+  k_timer_start(&audio_timer, K_MSEC(5), K_MSEC(5));
 
   // Check the peripherals input (Green LED, LD4, Task 1, LogicAnalyzer CH0)
   k_tid_t task1 = k_thread_create(&task_1_data, task_1_stack_area,
