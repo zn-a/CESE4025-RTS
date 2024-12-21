@@ -157,6 +157,7 @@ int main(void) {
 
   int state = 0;
   while (1) {
+
     // Run the superloop slightly faster than once every 50 ms
     if (k_uptime_get() - time > BLOCK_GEN_PERIOD_MS-1) {
       time = k_uptime_get();
