@@ -19,7 +19,7 @@
 
 Synthesizer synth;
 // initializes a memory slab that has 6 blocks that are 400 bytes long, each of which is aligned to a 4-byte boundary
-k_tid_t task3_4 = NULL;
+k_tid_t task3 = NULL;
 /// Function that checks key presses
 void check_keyboard() {
   char character;
@@ -109,6 +109,52 @@ void *mem_block_write = allocBlock();
     synth.makesynth((uint8_t *)block_ptr_active);
     reset_led(&debug_led2);
 
+    void *temp = block_ptr_active;
+    block_ptr_active = block_ptr_inactive;
+    block_ptr_inactive = temp;
+
+    k_msleep(10);
+    k_timer_stop(&make_synth_timer);
+  }
+}
+
+
+#define GENERAL_STACK_SIZE 20000
+#define T1_PRIORITY (1)
+#define T2_PRIORITY (2)
+#define T3_PRIORITY (-1)
+#define T4_PRIORITY (-2)
+
+
+
+K_THREAD_STACK_DEFINE(task_1_stack_area, GENERAL_STACK_SIZE);
+struct k_thread task_1_data;
+K_THREAD_STACK_DEFINE(task_2_stack_area, GENERAL_STACK_SIZE);
+struct k_thread task_2_data;
+K_THREAD_STACK_DEFINE(task_3_stack_area, GENERAL_STACK_SIZE);
+struct k_thread task_3_data;
+K_THREAD_STACK_DEFINE(task_4_stack_area, GENERAL_STACK_SIZE);
+struct k_thread task_4_data;
+
+void synth_timer_callback(struct k_timer * timer) {
+  printuln("OVERLOAD. Abort.");
+  // TODO: SET Overload LED
+  k_thread_abort(task3);
+  printuln("Resuming synth");
+  task3 = k_thread_create(&task_3_data, task_3_stack_area,
+                                 K_THREAD_STACK_SIZEOF(task_3_stack_area),
+                                 make_write_synth_thread,
+                                 NULL, NULL, NULL,
+                                 T3_PRIORITY, 0, K_NO_WAIT);
+
+}
+
+void write_audio_thread(void * p1, void * p2, void * p3) {
+  printuln("write_audio_thread");
+  void *block_ptr_active = mem_block_synth;
+  void *block_ptr_inactive = mem_block_write;
+
+  while (true) {
     // Write audio block (Blue LED, LD6, Task 4, LogicAnalyzer CH3)
     set_led(&debug_led3);
     // writeBlock(mem_block);
@@ -118,36 +164,10 @@ void *mem_block_write = allocBlock();
     void *temp = block_ptr_active;
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
-    k_msleep(5);
-    k_timer_stop(&make_synth_timer);
+    // k_msleep(5);
   }
 }
 
-
-#define GENERAL_STACK_SIZE 20000
-#define T1_PRIORITY (1)
-#define T2_PRIORITY (2)
-#define T3_4_PRIORITY (3)
-
-
-K_THREAD_STACK_DEFINE(task_1_stack_area, GENERAL_STACK_SIZE);
-struct k_thread task_1_data;
-K_THREAD_STACK_DEFINE(task_2_stack_area, GENERAL_STACK_SIZE);
-struct k_thread task_2_data;
-K_THREAD_STACK_DEFINE(task_3_4_stack_area, GENERAL_STACK_SIZE);
-struct k_thread task_3_4_data;
-void synth_timer_callback(struct k_timer * timer) {
-  printuln("OVERLOAD. Abort.");
-  // TODO: SET Overload LED
-  k_thread_abort(task3_4);
-  printuln("Resuming synth");
-  task3_4 = k_thread_create(&task_3_4_data, task_3_4_stack_area,
-                                 K_THREAD_STACK_SIZEOF(task_3_4_stack_area),
-                                 make_write_synth_thread,
-                                 NULL, NULL, NULL,
-                                 T3_4_PRIORITY, 0, K_NO_WAIT);
-
-}
 int main(void) {
   initUsb();
   waitForUsb();
@@ -180,11 +200,17 @@ int main(void) {
                                    NULL, NULL, NULL,
                                    T2_PRIORITY, 0, K_NO_WAIT);
   // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2) and write audio block (Blue LED, LD6, Task 4, LogicAnalyzer CH3)
- task3_4 = k_thread_create(&task_3_4_data, task_3_4_stack_area,
-                                 K_THREAD_STACK_SIZEOF(task_3_4_stack_area),
+ task3 = k_thread_create(&task_3_data, task_3_stack_area,
+                                 K_THREAD_STACK_SIZEOF(task_3_stack_area),
                                  make_write_synth_thread,
                                  NULL, NULL, NULL,
-                                 T3_4_PRIORITY, 0, K_NO_WAIT);
+                                 T3_PRIORITY, 0, K_NO_WAIT);
+
+  k_tid_t task4 = k_thread_create(&task_4_data, task_4_stack_area,
+                                 K_THREAD_STACK_SIZEOF(task_4_stack_area),
+                                 write_audio_thread,
+                                 NULL, NULL, NULL,
+                                 T4_PRIORITY, 0, K_NO_WAIT);
 
   int state = 0;
   while (1) {
