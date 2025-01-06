@@ -91,23 +91,7 @@ K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 void *mem_block_synth = allocBlock();
 void *mem_block_write = allocBlock();
 [[noreturn]] void make_write_synth_thread(void *, void *, void *) {
-  // char *block_ptr_synth;
-  // char *block_ptr_write;
-  // printuln("Block size: %p\n", sizeof(int16_t) * (44100*0.05));
-  // if (k_mem_slab_alloc(&audio_buffer, (void **)&block_ptr_synth, K_MSEC(100)) == 0) {
-  //   memset(block_ptr_synth, 0, 400);
-  // } else {
-  //   printuln("Memory allocation failed/timed out.");
-  // }
-
-  // if (k_mem_slab_alloc(&audio_buffer, (void **)&block_ptr_write, K_MSEC(100)) == 0) {
-  //   memset(block_ptr_write, 0, 400);
-  // } else {
-  //   printuln("Memory allocation failed/timed out.");
-  // }
   printuln("make_write_synth_thread");
-  // printuln("Synth block: %p\n", block_ptr_synth);
-  // printuln("Write block: %p\n", block_ptr_write);
   void *block_ptr_active = mem_block_synth;
   void *block_ptr_inactive = mem_block_write;
 
@@ -129,9 +113,6 @@ void *mem_block_write = allocBlock();
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
   }
-  // k_mem_slab_free(&audio_buffer, (void *)block_ptr_synth);
-  // k_mem_slab_free(&audio_buffer, (void *)block_ptr_write);
-
 }
 
 

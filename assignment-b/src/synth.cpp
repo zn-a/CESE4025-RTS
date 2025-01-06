@@ -498,7 +498,6 @@ float Synthesizer::get_sound_sample(Key &key) {
 void Synthesizer::makesynth(uint8_t *block) {
   for (int i = 0; i < BLOCK_SIZE; i += 2) {
     float sample = 0;
-
     // get the synthesized sound for every pressed key
     for (int j = 0; j < MAX_KEYS; j++) {
       if (keys[j].state == PRESSED &&
