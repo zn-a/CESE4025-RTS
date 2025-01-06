@@ -19,7 +19,7 @@
 
 Synthesizer synth;
 // initializes a memory slab that has 6 blocks that are 400 bytes long, each of which is aligned to a 4-byte boundary
-
+k_tid_t task3_4 = NULL;
 /// Function that checks key presses
 void check_keyboard() {
   char character;
@@ -84,6 +84,12 @@ static void audio_timer_callback(struct k_timer *timer_id)
 }
 K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 
+void synth_timer_callback(struct k_timer * timer) {
+  k_thread_abort(task3_4);
+}
+
+K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
+
 // Ensure buffer/block size and timer period align
 // Buffer for writing to audio driver
 // void *mem_block = allocBlock();
@@ -91,6 +97,7 @@ K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 void *mem_block_synth = allocBlock();
 void *mem_block_write = allocBlock();
 [[noreturn]] void make_write_synth_thread(void *, void *, void *) {
+
   printuln("make_write_synth_thread");
   void *block_ptr_active = mem_block_synth;
   void *block_ptr_inactive = mem_block_write;
@@ -161,7 +168,7 @@ int main(void) {
                                    NULL, NULL, NULL,
                                    T2_PRIORITY, 0, K_NO_WAIT);
   // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2) and write audio block (Blue LED, LD6, Task 4, LogicAnalyzer CH3)
-  k_tid_t task3_4 = k_thread_create(&task_3_4_data, task_3_4_stack_area,
+ task3_4 = k_thread_create(&task_3_4_data, task_3_4_stack_area,
                                  K_THREAD_STACK_SIZEOF(task_3_4_stack_area),
                                  make_write_synth_thread,
                                  NULL, NULL, NULL,
