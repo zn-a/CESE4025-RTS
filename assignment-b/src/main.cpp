@@ -84,9 +84,8 @@ static void audio_timer_callback(struct k_timer *timer_id)
 }
 K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 
-void synth_timer_callback(struct k_timer * timer) {
-  k_thread_abort(task3_4);
-}
+
+void synth_timer_callback(struct k_timer * timer);
 
 K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
 
@@ -97,12 +96,12 @@ K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
 void *mem_block_synth = allocBlock();
 void *mem_block_write = allocBlock();
 [[noreturn]] void make_write_synth_thread(void *, void *, void *) {
-
   printuln("make_write_synth_thread");
   void *block_ptr_active = mem_block_synth;
   void *block_ptr_inactive = mem_block_write;
 
   while (true) {
+    k_timer_start(&make_synth_timer, K_MSEC(500), K_NO_WAIT);
     k_sem_take(&make_write_synth, K_FOREVER);
     // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2)
     set_led(&debug_led2);
@@ -119,6 +118,8 @@ void *mem_block_write = allocBlock();
     void *temp = block_ptr_active;
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
+    k_msleep(5);
+    k_timer_stop(&make_synth_timer);
   }
 }
 
@@ -135,7 +136,18 @@ K_THREAD_STACK_DEFINE(task_2_stack_area, GENERAL_STACK_SIZE);
 struct k_thread task_2_data;
 K_THREAD_STACK_DEFINE(task_3_4_stack_area, GENERAL_STACK_SIZE);
 struct k_thread task_3_4_data;
+void synth_timer_callback(struct k_timer * timer) {
+  printuln("OVERLOAD. Abort.");
+  // TODO: SET Overload LED
+  k_thread_abort(task3_4);
+  printuln("Resuming synth");
+  task3_4 = k_thread_create(&task_3_4_data, task_3_4_stack_area,
+                                 K_THREAD_STACK_SIZEOF(task_3_4_stack_area),
+                                 make_write_synth_thread,
+                                 NULL, NULL, NULL,
+                                 T3_4_PRIORITY, 0, K_NO_WAIT);
 
+}
 int main(void) {
   initUsb();
   waitForUsb();
