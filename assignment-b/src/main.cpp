@@ -122,8 +122,10 @@ void *mem_block_write = allocBlock();
 #define GENERAL_STACK_SIZE 20000
 #define T1_PRIORITY (1)
 #define T2_PRIORITY (2)
-#define T3_PRIORITY (-1)
-#define T4_PRIORITY (-2)
+#define T3_PRIORITY (3)
+#define T4_PRIORITY (-1)
+// TODO: We changed the t4 priority to -1 because we never want write audio to be interrupted,
+// write in report
 
 
 
