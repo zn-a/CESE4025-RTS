@@ -96,12 +96,14 @@ K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
 void *mem_block_synth = allocBlock();
 void *mem_block_write = allocBlock();
 [[noreturn]] void make_write_synth_thread(void *, void *, void *) {
+  k_msleep(500);
+  reset_led(&status_led4);
   printuln("make_write_synth_thread");
   void *block_ptr_active = mem_block_synth;
   void *block_ptr_inactive = mem_block_write;
 
   while (true) {
-    k_timer_start(&make_synth_timer, K_MSEC(500), K_NO_WAIT);
+    k_timer_start(&make_synth_timer, K_MSEC(25), K_NO_WAIT);
     k_sem_take(&make_write_synth, K_FOREVER);
     // Make synth sound (Red LED, LD5, Task 3, LogicAnalyzer CH2)
     set_led(&debug_led2);
@@ -140,8 +142,16 @@ struct k_thread task_4_data;
 
 void synth_timer_callback(struct k_timer * timer) {
   printuln("OVERLOAD. Abort.");
+  // void *mem_block_synth = allocBlock();
+  // void *mem_block_write = allocBlock();
   // TODO: SET Overload LED
   k_thread_abort(task3);
+  memset(mem_block_synth, 0, 4410); // set all to 0
+  memset(mem_block_write, 0, 4410);
+
+  set_led(&status_led4);
+
+
   printuln("Resuming synth");
   task3 = k_thread_create(&task_3_data, task_3_stack_area,
                                  K_THREAD_STACK_SIZEOF(task_3_stack_area),
@@ -167,6 +177,7 @@ void write_audio_thread(void * p1, void * p2, void * p3) {
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
     // k_msleep(5);
+    // TODO: do I have to yield?
   }
 }
 
