@@ -182,6 +182,7 @@ void write_audio_thread(void * p1, void * p2, void * p3) {
 }
 
 int main(void) {
+
   initUsb();
   waitForUsb();
 
