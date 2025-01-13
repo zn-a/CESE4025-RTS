@@ -17,10 +17,7 @@
 #include <zephyr/logging/log.h>
 
 Synthesizer synth;
-void switch_switched(const struct device *dev, struct gpio_callback *cb, gpio_port_pins_t pins) {
-  set_led(&status_led4);
-  printuln("lol");
-}
+
 int ret = 0;
 const struct gpio_dt_spec sw_osc_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch0), gpios);
 const struct gpio_dt_spec sw_osc_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch1), gpios);
@@ -152,6 +149,8 @@ struct k_thread task_3_data;
 K_THREAD_STACK_DEFINE(task_4_stack_area, GENERAL_STACK_SIZE);
 struct k_thread task_4_data;
 
+
+
 void synth_timer_callback(struct k_timer * timer) {
   printuln("OVERLOAD. Abort.");
   // void *mem_block_synth = allocBlock();
@@ -191,6 +190,22 @@ void write_audio_thread(void * p1, void * p2, void * p3) {
     // k_msleep(5);
     // TODO: do I have to yield?
   }
+}
+static void debounce_thread(struct k_work *work) {
+  printuln("debounce_thread");
+  int val = gpio_pin_get_dt(&sw_osc_dn);
+  printuln("%d", val);
+}
+static K_WORK_DELAYABLE_DEFINE(debounce_work, debounce_thread);
+
+// ISR
+void switch_switched(const struct device *dev, struct gpio_callback *cb, gpio_port_pins_t pins) {
+  set_led(&status_led4);
+  k_work_reschedule(&debounce_work, K_MSEC(15));
+  reset_led(&status_led4);
+
+
+
 }
 
 int main(void) {
