@@ -137,9 +137,10 @@ int peripherals_update() {
   }
 
   // Update the switches
-  for (int i = 0; i < N_SWITCHES; i++) {
-    switches[i].update();
-  }
+  // MOVED THIS TO WORKTHREAD
+  // for (int i = 0; i < N_SWITCHES; i++) {
+  //   switches[i].update();
+  // }
 
   // Update the rotary encoders
   for (int i = 0; i < N_ENCODERS; i++) {

@@ -21,12 +21,12 @@ Synthesizer synth;
 int ret = 0;
 const struct gpio_dt_spec sw_osc_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch0), gpios);
 const struct gpio_dt_spec sw_osc_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch1), gpios);
-// const struct gpio_dt_spec sw1_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch4), gpios);
-// const struct gpio_dt_spec sw1_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch5), gpios);
-// const struct gpio_dt_spec sw2_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch6), gpios);
-// const struct gpio_dt_spec sw2_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch7), gpios);
-// const struct gpio_dt_spec sw3_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch2), gpios);
-// const struct gpio_dt_spec sw3_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch3), gpios);
+const struct gpio_dt_spec sw1_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch4), gpios);
+const struct gpio_dt_spec sw1_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch5), gpios);
+const struct gpio_dt_spec sw2_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch6), gpios);
+const struct gpio_dt_spec sw2_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch7), gpios);
+const struct gpio_dt_spec sw3_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch2), gpios);
+const struct gpio_dt_spec sw3_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch3), gpios);
 static struct gpio_callback switch_data;
 k_tid_t task3 = NULL;
 /// Function that checks key presses
@@ -193,8 +193,9 @@ void write_audio_thread(void * p1, void * p2, void * p3) {
 }
 static void debounce_thread(struct k_work *work) {
   printuln("debounce_thread");
-  int val = gpio_pin_get_dt(&sw_osc_dn);
-  printuln("%d", val);
+  for (int i = 0; i < N_SWITCHES; i++) {
+    switches[i].update();
+  }
 }
 static K_WORK_DELAYABLE_DEFINE(debounce_work, debounce_thread);
 
@@ -229,29 +230,33 @@ int main(void) {
   gpio_pin_interrupt_configure_dt(&sw_osc_dn, GPIO_INT_TRIG_LOW);
   gpio_pin_interrupt_configure_dt(&sw_osc_up, GPIO_INT_TRIG_LOW);
 
-  // gpio_pin_configure_dt(&sw1_dn, GPIO_INT_EDGE_RISING);
-  // gpio_pin_configure_dt(&sw1_up, GPIO_INT_EDGE_RISING);
-  // gpio_pin_configure_dt(&sw2_dn, GPIO_INT_EDGE_RISING);
-  // gpio_pin_configure_dt(&sw2_up, GPIO_INT_EDGE_RISING);
-  // gpio_pin_configure_dt(&sw3_dn, GPIO_INT_EDGE_RISING);
-  // gpio_pin_configure_dt(&sw3_up, GPIO_INT_EDGE_RISING);
+  gpio_pin_interrupt_configure_dt(&sw1_dn, GPIO_INT_TRIG_LOW);
+  gpio_pin_interrupt_configure_dt(&sw1_up, GPIO_INT_TRIG_LOW);
+  gpio_pin_interrupt_configure_dt(&sw2_dn, GPIO_INT_TRIG_LOW);
+  gpio_pin_interrupt_configure_dt(&sw2_up, GPIO_INT_TRIG_LOW);
+  gpio_pin_interrupt_configure_dt(&sw3_dn, GPIO_INT_TRIG_LOW);
+  gpio_pin_interrupt_configure_dt(&sw3_up, GPIO_INT_TRIG_LOW);
   gpio_init_callback(
-    &switch_data,
-    switch_switched,
-    BIT(sw_osc_dn.pin) |
-        BIT(sw_osc_up.pin)
-
-);
+      &switch_data,
+      switch_switched,
+      BIT(sw_osc_dn.pin) |
+          BIT(sw_osc_up.pin) |
+          BIT(sw1_dn.pin) |
+          BIT(sw1_up.pin) |
+          BIT(sw2_dn.pin) |
+          BIT(sw2_up.pin) |
+          BIT(sw3_dn.pin) |
+          BIT(sw3_up.pin)
+  );
   gpio_add_callback(sw_osc_dn.port, &switch_data);
   gpio_add_callback(sw_osc_up.port, &switch_data);
 
-  // gpio_add_callback(sw_osc_up.port, &switch_data);
-  // gpio_add_callback(sw1_dn.port, &switch_data);
-  // gpio_add_callback(sw1_up.port, &switch_data);
-  // gpio_add_callback(sw2_dn.port, &switch_data);
-  // gpio_add_callback(sw2_up.port, &switch_data);
-  // gpio_add_callback(sw3_dn.port, &switch_data);
-  // gpio_add_callback(sw3_up.port, &switch_data);
+  gpio_add_callback(sw1_dn.port, &switch_data);
+  gpio_add_callback(sw1_up.port, &switch_data);
+  gpio_add_callback(sw2_dn.port, &switch_data);
+  gpio_add_callback(sw2_up.port, &switch_data);
+  gpio_add_callback(sw3_dn.port, &switch_data);
+  gpio_add_callback(sw3_up.port, &switch_data);
 
   printuln("== Finished initialization ==");
 
@@ -259,11 +264,11 @@ int main(void) {
   k_timer_start(&audio_timer, K_MSEC(5), K_MSEC(5));
 
   // Check the peripherals input (Green LED, LD4, Task 1, LogicAnalyzer CH0)
-  // k_tid_t task1 = k_thread_create(&task_1_data, task_1_stack_area,
-  //                                  K_THREAD_STACK_SIZEOF(task_1_stack_area),
-  //                                  peripheral_update_thread,
-  //                                  NULL, NULL, NULL,
-  //                                  T1_PRIORITY, 0, K_NO_WAIT);
+  k_tid_t task1 = k_thread_create(&task_1_data, task_1_stack_area,
+                                   K_THREAD_STACK_SIZEOF(task_1_stack_area),
+                                   peripheral_update_thread,
+                                   NULL, NULL, NULL,
+                                   T1_PRIORITY, 0, K_NO_WAIT);
   // Get user input from the keyboard (Orange LED, LD3, Task 2, LogicAnalyzer CH1)
   k_tid_t task2 = k_thread_create(&task_2_data, task_2_stack_area,
                                    K_THREAD_STACK_SIZEOF(task_2_stack_area),
