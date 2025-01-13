@@ -26,10 +26,8 @@ static const uint8_t PORT_EXPANDER_ADDR0 = 0b0100000;
 RotaryEncoder encoders[N_ENCODERS];
 
 // GPIOs
-const struct gpio_dt_spec sw_osc_dn =
-    GPIO_DT_SPEC_GET(DT_ALIAS(switch0), gpios);
-const struct gpio_dt_spec sw_osc_up =
-    GPIO_DT_SPEC_GET(DT_ALIAS(switch1), gpios);
+const struct gpio_dt_spec sw_osc_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch0), gpios);
+const struct gpio_dt_spec sw_osc_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch1), gpios);
 const struct gpio_dt_spec sw1_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch4), gpios);
 const struct gpio_dt_spec sw1_up = GPIO_DT_SPEC_GET(DT_ALIAS(switch5), gpios);
 const struct gpio_dt_spec sw2_dn = GPIO_DT_SPEC_GET(DT_ALIAS(switch6), gpios);
