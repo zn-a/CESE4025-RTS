@@ -60,26 +60,25 @@ void check_keyboard() {
     }
   }
 }
-
+// Task 1
 void peripheral_update_thread(void *, void *, void *) {
   printuln("peripheral_update_thread");
   while (true) {
     set_led(&debug_led0);
     peripherals_update();
     reset_led(&debug_led0);
-    // 50 is smooth
-    k_msleep(50);
+    k_msleep(15);
   }
 }
 
-
+// Task 2
 void check_keyboard_thread(void *, void *, void *) {
   printuln("check_keyboard_thread");
   while (true) {
     set_led(&debug_led1);
     check_keyboard();
     reset_led(&debug_led1);
-    k_msleep(50);
+    k_msleep(1);
   }
 
 }
@@ -93,7 +92,7 @@ static void audio_timer_callback(struct k_timer *timer_id)
 }
 K_TIMER_DEFINE(audio_timer, audio_timer_callback, NULL);
 
-
+// Task 3
 void synth_timer_callback(struct k_timer * timer);
 
 K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
@@ -105,7 +104,7 @@ K_TIMER_DEFINE(make_synth_timer, synth_timer_callback, NULL);
 void *mem_block_synth = allocBlock();
 void *mem_block_write = allocBlock();
 [[noreturn]] void make_write_synth_thread(void *, void *, void *) {
-  k_msleep(500);
+  k_msleep(5);
   reset_led(&status_led4);
   printuln("make_write_synth_thread");
   void *block_ptr_active = mem_block_synth;
@@ -124,7 +123,7 @@ void *mem_block_write = allocBlock();
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
 
-    k_msleep(10);
+    k_msleep(7);
     k_timer_stop(&make_synth_timer);
   }
 }
@@ -153,9 +152,6 @@ struct k_thread task_4_data;
 
 void synth_timer_callback(struct k_timer * timer) {
   printuln("OVERLOAD. Abort.");
-  // void *mem_block_synth = allocBlock();
-  // void *mem_block_write = allocBlock();
-  // TODO: SET Overload LED
   k_thread_abort(task3);
   memset(mem_block_synth, 0, 4410); // set all to 0
   memset(mem_block_write, 0, 4410);
@@ -172,6 +168,7 @@ void synth_timer_callback(struct k_timer * timer) {
 
 }
 
+// Task 4
 void write_audio_thread(void * p1, void * p2, void * p3) {
   printuln("write_audio_thread");
   void *block_ptr_active = mem_block_synth;
@@ -187,8 +184,7 @@ void write_audio_thread(void * p1, void * p2, void * p3) {
     void *temp = block_ptr_active;
     block_ptr_active = block_ptr_inactive;
     block_ptr_inactive = temp;
-    // k_msleep(5);
-    // TODO: do I have to yield?
+    k_msleep(50);
   }
 }
 static void debounce_thread(struct k_work *work) {
@@ -204,9 +200,6 @@ void switch_switched(const struct device *dev, struct gpio_callback *cb, gpio_po
   set_led(&status_led4);
   k_work_reschedule(&debounce_work, K_MSEC(15));
   reset_led(&status_led4);
-
-
-
 }
 
 int main(void) {
